@@ -172,6 +172,8 @@ For each tool, describe the specific failure mode you're handling and what the a
      ASCII art, a Mermaid diagram (https://mermaid.js.org/syntax/flowchart.html), or an embedded
      sketch are all fine. You'll share this diagram with an AI tool when asking it to implement
      the planning loop and each individual tool. -->
+     <img width="759" height="654" alt="Screenshot 2026-06-14 at 2 12 14 PM" src="https://github.com/user-attachments/assets/f7007988-c21c-4e65-9a53-dbff9fd4c502" />
+
 
 ---
 
