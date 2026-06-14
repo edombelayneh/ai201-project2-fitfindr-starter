@@ -36,6 +36,16 @@ def _get_groq_client():
 
 # ── Tool 1: search_listings ───────────────────────────────────────────────────
 
+# Search lisitings is going to take the listings.json file 
+# Based on the description it gets, it is to filter and return the sorted best 3 matches 
+
+# Example:
+# returns 3 matching listings sorted by relevance. 
+# FitFindr picks the top result: "Faded Band Tee — $22, Depop, Good condition."
+
+# If search_listings returns nothing, FitFindr tells the user what to try differently and stops — 
+# it does not call suggest_outfit with empty input.
+
 def search_listings(
     description: str,
     size: str | None = None,
@@ -75,6 +85,14 @@ def search_listings(
 
 # ── Tool 2: suggest_outfit ────────────────────────────────────────────────────
 
+# Suggest outfit is going to take the item that search listings returns 
+# It should also take the user's wardrobe from wardrobe_schema.json 
+# Based on the item and the wardrobe it should suggest an outfit 
+
+# Example:
+# "Pair this with your wide-leg jeans and platform Docs for a classic 90s grunge look. 
+# Roll the sleeves once and tuck the front corner slightly for shape."
+
 def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
     """
     Given a thrifted item and the user's wardrobe, suggest 1–2 complete outfits.
@@ -105,6 +123,10 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
 
 
 # ── Tool 3: create_fit_card ───────────────────────────────────────────────────
+
+# 
+# Example:
+# "thrifted this faded band tee off depop for $22 and honestly it was made for my wide-legs 🖤 full look in my stories"
 
 def create_fit_card(outfit: str, new_item: dict) -> str:
     """
