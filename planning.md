@@ -203,8 +203,6 @@ flowchart TD
     Diag -.->|writes error| State
 ```
 
-     <img width="759" height="654" alt="Screenshot 2026-06-14 at 2 12 14 PM" src="https://github.com/user-attachments/assets/f7007988-c21c-4e65-9a53-dbff9fd4c502" />
-
 ---
 
 ## AI Tool Plan
