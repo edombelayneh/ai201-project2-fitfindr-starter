@@ -104,6 +104,30 @@ If the outfit string is empty or only whitespace, it returns a descriptive error
 
 <!-- Copy the block above for any tools beyond the required three -->
 
+### Tool 4: diagnose_empty_search
+
+**What it does:**
+
+When `search_listings` returns nothing, this tool figures out _why_ by re-running the search with filters peeled off one at a time, then returns a user-facing message explaining what to try differently. The planning loop calls it only on the empty-result branch.
+
+**Input parameters:**
+
+- `description` (str): The same description passed to the failed search.
+- `size` (str): The size filter that was applied, or `None` if none was.
+- `max_price` (float): The price ceiling that was applied, or `None` if none was.
+
+**What it returns:**
+
+A non-empty message string for `session["error"]`. The message is case-specific:
+
+- **Price was the blocker** (re-search with `max_price` dropped finds matches) → says the item exists but is over budget and suggests a higher max.
+- **Size was the blocker** (re-search with `size` dropped finds matches) → says the item exists but not in that size and lists available sizes.
+- **Item unavailable** (description alone still finds nothing) → asks the user to try different keywords.
+
+**What happens if it fails or returns nothing:**
+
+It always returns a non-empty string — the third (unavailable) branch is the catch-all fallback, so there is no path that returns an empty message or raises.
+
 ---
 
 ## Planning Loop
@@ -220,7 +244,32 @@ flowchart TD
 
 **Milestone 3 — Individual tool implementations:**
 
+**Tool:** Claude (via Claude Code in VS Code).
+
+**Input:** The Tool 1/2/3 specs above — each tool's inputs, return value, and failure mode — plus the `load_listings()` / `get_example_wardrobe()` signatures from `utils/data_loader.py` and the listing field list. For the LLM-backed tools I also gave it the exact failure behavior (empty wardrobe → general advice; empty outfit → error string, never raise).
+
+**What I expect it to produce:**
+
+- `search_listings()` — load listings, filter by `max_price` and `size`, score by keyword overlap with the description, drop score-0 items, return the top 3 sorted by score.
+- `diagnose_empty_search()` — re-run the search peeling off filters in order (drop price → drop size → description-only) to explain _why_ nothing matched.
+- `suggest_outfit()` — branch on empty vs. populated wardrobe and build the right LLM prompt.
+- `create_fit_card()` — guard empty/whitespace outfit, otherwise build a high-temperature caption prompt.
+
+**How I'll verify before moving on:** Run `pytest tests/ -v`. The suite uses a fake Groq client so it's offline and deterministic — it asserts the branch/guard logic and the prompt text, not model wording. Checks include: search returns only relevant matches, respects price and size filters, returns `[]` (never raises) on no match; the three diagnostic branches; empty-wardrobe fallback; and the empty-outfit guard (LLM not called). All 13 tests must pass.
+
 **Milestone 4 — Planning loop and state management:**
+
+**Tool:** Claude (via Claude Code in VS Code).
+
+**Input:** The Planning Loop, State Management, and Error Handling sections above, plus the Mermaid diagram and the `_new_session()` field list. I told it parsing is LLM-based (per the Planning Loop step 1) and that the empty-result branch must call `diagnose_empty_search()` and return early without calling `suggest_outfit()`.
+
+**What I expect it to produce:**
+
+- `_parse_query()` — an LLM call (temperature 0) that returns `{description, size, max_price}` as JSON, with a fallback to `{description: query, size: None, max_price: None}` if the call or JSON parse fails, plus `"$30"` → `30.0` coercion.
+- `run_agent()` — the 7-step loop reading/writing only the `session` dict: init → parse → search → (empty → diagnose + early return) → select top result → suggest_outfit → create_fit_card → return.
+- `handle_query()` in `app.py` — guard empty query, pick wardrobe from the radio choice, call `run_agent()`, show `session["error"]` in panel 1 on early exit, else format `selected_item` into a listing card alongside the outfit and fit card.
+
+**How I'll verify before moving on:** Re-run `pytest tests/` to confirm the tools still pass (13/13). Then run the `agent.py` CLI and `handle_query()` directly across three paths — happy path (listing + outfit + card all populated), no-results path (diagnostic message in panel 1, other panels empty), and empty query (guard message, no agent call). Finally launch `python app.py` and confirm the same behavior end-to-end in the Gradio UI.
 
 ---
 
@@ -255,11 +304,3 @@ Based on the outfit that was generated and the new item that was found, it gener
 **Final output to user:**
 
 <!-- What does the user actually see at the end? -->
-
-```
-
-```
-
-```
-
-```
