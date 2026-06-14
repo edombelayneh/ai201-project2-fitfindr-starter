@@ -172,6 +172,39 @@ For each tool, describe the specific failure mode you're handling and what the a
      ASCII art, a Mermaid diagram (https://mermaid.js.org/syntax/flowchart.html), or an embedded
      sketch are all fine. You'll share this diagram with an AI tool when asking it to implement
      the planning loop and each individual tool. -->
+
+     ```
+     flowchart TD
+    User([User query]) -->|query string| Loop[Planning Loop]
+
+    Loop -->|query| Parse[Parse query with LLM]
+    Parse -->|"parsed: description, size, max_price"| Search["search_listings(description, size, max_price)"]
+
+    Search -->|"results = [item, ...]"| Select["Session: selected_item = results[0]"]
+    Search -->|"results = []"| Diag{Diagnostic re-searches}
+
+    Diag -->|drop max_price, matches found| ErrPrice["ERROR: item exists but over budget, suggest a higher max"]
+    Diag -->|drop size, matches found| ErrSize["ERROR: item exists but not in your size, suggest a different size"]
+    Diag -->|description-only, still empty| ErrItem["ERROR: item unavailable, ask user to change the search"]
+
+    ErrPrice -->|"session.error set"| ReturnErr([Return session early])
+    ErrSize -->|"session.error set"| ReturnErr
+    ErrItem -->|"session.error set"| ReturnErr
+
+    Select -->|"selected_item + wardrobe"| Suggest["suggest_outfit(selected_item, wardrobe)"]
+    Suggest -->|"session.outfit_suggestion"| Card["create_fit_card(outfit_suggestion, selected_item)"]
+    Card -->|"session.fit_card"| ReturnOk([Return session])
+
+    State[("Session state: query / parsed / search_results / selected_item / wardrobe / outfit_suggestion / fit_card / error")]
+    Search -.->|writes search_results| State
+    Select -.->|writes selected_item| State
+    Suggest -.->|writes outfit_suggestion| State
+    Card -.->|writes fit_card| State
+    Diag -.->|writes error| State
+
+```
+
+
      <img width="759" height="654" alt="Screenshot 2026-06-14 at 2 12 14 PM" src="https://github.com/user-attachments/assets/f7007988-c21c-4e65-9a53-dbff9fd4c502" />
 
 
@@ -227,3 +260,4 @@ Based on the outfit that was generated and the new item that was found, it gener
 **Final output to user:**
 
 <!-- What does the user actually see at the end? -->
+```
