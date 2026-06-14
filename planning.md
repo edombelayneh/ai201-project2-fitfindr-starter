@@ -304,3 +304,16 @@ Based on the outfit that was generated and the new item that was found, it gener
 **Final output to user:**
 
 <!-- What does the user actually see at the end? -->
+## Happy Path
+1.  happy path (parses price, finds a match, full output)
+   <img width="1259" height="544" alt="Screenshot 2026-06-14 at 3 33 49 PM" src="https://github.com/user-attachments/assets/5183f734-d3ce-4156-b916-6ea16607adea" />
+
+2.  happy path with a size filter
+   <img width="1238" height="565" alt="Screenshot 2026-06-14 at 3 34 48 PM" src="https://github.com/user-attachments/assets/29421683-eddf-4a87-a6af-4eaca5a424ec" />
+
+3.  happy path, different category
+   <img width="1260" height="570" alt="Screenshot 2026-06-14 at 3 34 07 PM" src="https://github.com/user-attachments/assets/c4fe00d6-bffc-4656-be86-549022f0aec6" />
+
+## No Results - (shows the diagnostic error)
+<img width="1262" height="535" alt="Screenshot 2026-06-14 at 3 34 33 PM" src="https://github.com/user-attachments/assets/57359a64-f230-4d08-b55e-2a8f043c3347" />
+
